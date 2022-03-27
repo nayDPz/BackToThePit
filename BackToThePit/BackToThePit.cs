@@ -22,7 +22,7 @@ namespace BackToThePit
     [R2APISubmoduleDependency(nameof(SoundAPI), nameof(LanguageAPI))]
     public class BackToThePit : BaseUnityPlugin
 	{
-        public const string PluginGUID = PluginAuthor + "." + PluginName;
+        public const string PluginGUID = "com." + PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "badeepz";
         public const string PluginName = "BackToThePit";
         public const string PluginVersion = "1.0.0";
@@ -37,12 +37,14 @@ namespace BackToThePit
             instance = this;
             Log.Init(Logger);
 
-            ModSettingsManager.addOption(new ModOption(ModOption.OptionType.Slider, "Narrator Volume", "Volume of the narrator.", "100"));
-            ModSettingsManager.setPanelTitle("BackToThePit Settings");
-            ModSettingsManager.setPanelDescription("Configure settings for the BackToThePit mod");
-            ModSettingsManager.addListener(ModSettingsManager.getOption("Narrator Volume"), new UnityEngine.Events.UnityAction<float>(floatEvent));
 
             Modules.Config.ReadConfig();
+
+            
+
+            ModSettingsManager.AddOption(new RiskOfOptions.Options.SliderOption(Modules.Config.volume));
+
+            Modules.Config.volume.SettingChanged += (object sender, EventArgs args) => { cvNarratorVolume.AttemptSetString(Modules.Config.volume.Value.ToString()); };
 
             using (Stream manifestResourceStream2 = Assembly.GetExecutingAssembly().GetManifestResourceStream("BackToThePit.NarratorBank.bnk"))
             {
@@ -56,25 +58,66 @@ namespace BackToThePit
             narratorController.AddComponent<NarratorController>();
             NarratorController.Init();
 
-
-            On.RoR2.UI.CharacterSelectController.SelectSurvivor += CharacterSelectController_SelectSurvivor;
+            On.RoR2.SurvivorMannequins.SurvivorMannequinSlotController.RebuildMannequinInstance += SurvivorMannequinSlotController_RebuildMannequinInstance;
             On.RoR2.HealthComponent.TriggerOneShotProtection += HealthComponent_TriggerOneShotProtection;
             On.RoR2.HealthComponent.Heal += HealthComponent_Heal;
             On.RoR2.CharacterMaster.RespawnExtraLife += CharacterMaster_RespawnExtraLife;
-            On.RoR2.GenericPickupController.GrantItem += GenericPickupController_GrantItem;
-            On.RoR2.GenericPickupController.GrantEquipment += GenericPickupController_GrantEquipment;
+            On.RoR2.ItemDef.AttemptGrant += ItemDef_AttemptGrant;
+            On.RoR2.EquipmentDef.AttemptGrant += EquipmentDef_AttemptGrant;
             TeleporterInteraction.onTeleporterFinishGlobal += TeleporterInteraction_onTeleporterFinishGlobal;
             SceneManager.sceneLoaded += SceneManager_sceneLoaded;
             GlobalEventManager.onCharacterDeathGlobal += GlobalEventManager_onCharacterDeathGlobal;
             GlobalEventManager.onServerDamageDealt += GlobalEventManager_onServerDamageDealt; 
             
 
-            Log.LogInfo(nameof(Awake) + " done.");
+            Log.LogInfo("Remind yourself that overconfidence is a slow and insidious killer.");
         }
 
-        private void Update()
+        public void Start()
         {
-            Log.LogInfo(cvNarratorVolume.ToString());
+            cvNarratorVolume.AttemptSetString(Modules.Config.volume.Value.ToString());
+        }
+
+        private void SurvivorMannequinSlotController_RebuildMannequinInstance(On.RoR2.SurvivorMannequins.SurvivorMannequinSlotController.orig_RebuildMannequinInstance orig, RoR2.SurvivorMannequins.SurvivorMannequinSlotController self)
+        {
+            GameObject bodyPrefab = self.currentSurvivorDef.bodyPrefab;
+
+            NarratorController.instance.RequestNarration(new NarrationRequest
+            {
+                soundString = "Announce" + bodyPrefab.name,
+                cooldown = 0f,
+                priority = NarratorController.InterruptPriority.CharacterSelect
+            });
+
+            orig(self);
+        }
+
+        private void EquipmentDef_AttemptGrant(On.RoR2.EquipmentDef.orig_AttemptGrant orig, ref PickupDef.GrantContext context)
+        {
+            if (context.body.isPlayerControlled)
+            {
+                NarratorController.instance.RequestNarration(new NarrationRequest
+                {
+                    soundString = "AnnouncePlayerPickup",
+                    cooldown = 12f,
+                    priority = NarratorController.InterruptPriority.High
+                });
+            }
+            orig(ref context);
+        }
+
+        private void ItemDef_AttemptGrant(On.RoR2.ItemDef.orig_AttemptGrant orig, ref PickupDef.GrantContext context)
+        {
+            if (context.body.isPlayerControlled)
+            {
+                NarratorController.instance.RequestNarration(new NarrationRequest
+                {
+                    soundString = "AnnouncePlayerPickup",
+                    cooldown = 12f,
+                    priority = NarratorController.InterruptPriority.High
+                });
+            }
+            orig(ref context);
         }
 
         private void TeleporterInteraction_onTeleporterFinishGlobal(TeleporterInteraction obj)
@@ -87,40 +130,7 @@ namespace BackToThePit
             });
         }
 
-        public void floatEvent(float f)
-        {
-            cvNarratorVolume.AttemptSetString(f.ToString());
-        }
-
-        private void GenericPickupController_GrantEquipment(On.RoR2.GenericPickupController.orig_GrantEquipment orig, GenericPickupController self, CharacterBody body, Inventory inventory)
-        {
-            if (body.isPlayerControlled)
-            {
-                NarratorController.instance.RequestNarration(new NarrationRequest
-                {
-                    soundString = "AnnouncePlayerPickup",
-                    cooldown = 7f,
-                    priority = NarratorController.InterruptPriority.Mid
-                });
-            }
-
-            orig(self, body, inventory);
-        }
-
-        private void GenericPickupController_GrantItem(On.RoR2.GenericPickupController.orig_GrantItem orig, GenericPickupController self, CharacterBody body, Inventory inventory)
-        {
-            if(body.isPlayerControlled)
-            {
-                NarratorController.instance.RequestNarration(new NarrationRequest
-                {
-                    soundString = "AnnouncePlayerPickup",
-                    cooldown = 7f,
-                    priority = NarratorController.InterruptPriority.Mid
-                });
-            }
-            
-            orig(self, body, inventory);
-        }
+        
 
         private void CharacterMaster_RespawnExtraLife(On.RoR2.CharacterMaster.orig_RespawnExtraLife orig, CharacterMaster self)
         {
@@ -138,22 +148,45 @@ namespace BackToThePit
 
         private void SceneManager_sceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
         {
-
-            if (scene.name == "arena" || scene.name == "bazaar" || scene.name == "dampcavesimple" || scene.name == "foggyswamp" || scene.name == "frozenwall" ||
-                scene.name == "goldshores" || scene.name == "golemplains" || scene.name == "golemplains2" || scene.name == "goolake" || scene.name == "moon2" || scene.name == "rootjungle" ||
-                scene.name == "shipgraveyard" || scene.name == "wispgraveyard")
+            if(NarratorController.instance)
             {
-                float i = UnityEngine.Random.value;
-                if (i > 0.2f)
+                if (scene.name == "arena" || scene.name == "bazaar" || scene.name == "dampcavesimple" || scene.name == "foggyswamp" || scene.name == "frozenwall" ||
+                                scene.name == "goldshores" || scene.name == "golemplains" || scene.name == "golemplains2" || scene.name == "goolake" || scene.name == "moon2" || scene.name == "rootjungle" ||
+                                scene.name == "shipgraveyard" || scene.name == "wispgraveyard")
+                {
+                    float i = UnityEngine.Random.value;
+                    if (i > 0.2f)
+                    {
+                        string name = scene.name;
+                        if(scene.name == "golemplains2")
+                            name = "golemplains";
+                        NarratorController.instance.RequestNarration(new NarrationRequest
+                        {
+                            soundString = "Announce" + name,
+                            cooldown = 7f,
+                            priority = NarratorController.InterruptPriority.High
+                        });
+                    }
+                    else
+                    {
+                        NarratorController.instance.RequestNarration(new NarrationRequest
+                        {
+                            soundString = "AnnounceGenericLevel",
+                            cooldown = 7f,
+                            priority = NarratorController.InterruptPriority.High
+                        });
+                    }
+                }
+                else if (scene.name == "mysteryspace" || scene.name == "limbo" || scene.name == "artifactworld")
                 {
                     NarratorController.instance.RequestNarration(new NarrationRequest
                     {
-                        soundString = "Announce" + scene.name,
+                        soundString = "AnnounceHiddenRealm",
                         cooldown = 7f,
                         priority = NarratorController.InterruptPriority.High
                     });
                 }
-                else
+                else if (scene.name == "blackbeach" || scene.name == "blackbeach2" || scene.name == "skymeadow")
                 {
                     NarratorController.instance.RequestNarration(new NarrationRequest
                     {
@@ -162,39 +195,22 @@ namespace BackToThePit
                         priority = NarratorController.InterruptPriority.High
                     });
                 }
-            }
-            else if (scene.name == "mysteryspace" || scene.name == "limbo" || scene.name == "artifactworld")
-            {
-                NarratorController.instance.RequestNarration(new NarrationRequest
+                else if (scene.name != "lobby")
                 {
-                    soundString = "AnnounceHiddenRealm",
-                    cooldown = 7f,
-                    priority = NarratorController.InterruptPriority.High
-                });
-            }    
-            else if (scene.name == "blackbeach" || scene.name == "blackbeach2" || scene.name == "skymeadow")
-            {
-                NarratorController.instance.RequestNarration(new NarrationRequest
-                {
-                    soundString = "AnnounceGenericLevel",
-                    cooldown = 7f,
-                    priority = NarratorController.InterruptPriority.High
-                });
+                    NarratorController.instance.RequestNarration(new NarrationRequest
+                    {
+                        soundString = "Buffer",
+                        cooldown = 2f,
+                        priority = NarratorController.InterruptPriority.High
+                    });
+                }
             }
-            else if(scene.name != "lobby")
-            {
-                NarratorController.instance.RequestNarration(new NarrationRequest
-                {
-                    soundString = "Buffer",
-                    cooldown = 7f,
-                    priority = NarratorController.InterruptPriority.High
-                });
-            }
+            
         }
 
         private float HealthComponent_Heal(On.RoR2.HealthComponent.orig_Heal orig, HealthComponent self, float amount, ProcChainMask procChainMask, bool nonRegen)
         {
-            if(self.body && self.body.teamComponent && self.body.teamComponent.teamIndex == TeamIndex.Player)
+            if(self.body.isPlayerControlled)
             {
                 if (amount > self.fullCombinedHealth * 0.6f)
                 {
@@ -202,7 +218,7 @@ namespace BackToThePit
                     {
                         soundString = "AnnounceBigHeal",
                         cooldown = 10f,
-                        priority = NarratorController.InterruptPriority.Low
+                        priority = NarratorController.InterruptPriority.Damage
                     });
                     return orig(self, amount, procChainMask, nonRegen);
                 }
@@ -235,20 +251,24 @@ namespace BackToThePit
 
         private void GlobalEventManager_onServerDamageDealt(DamageReport report)
         {
-            if (report.attackerTeamIndex == TeamIndex.Player && report.victimBody)
+            if(report.attackerBody)
             {
-                if(report.damageDealt > report.attackerBody.damage * 7.5f)
+                if (report.attackerBody.isPlayerControlled && report.victimBody)
                 {
-                    NarratorController.instance.RequestNarration(new NarrationRequest
+                    if (report.damageDealt > report.attackerBody.damage * 7.5f)
                     {
-                        soundString = "AnnounceBigHit",
-                        cooldown = 10f,
-                        priority = NarratorController.InterruptPriority.Damage
-                    });
-                    return;
+                        NarratorController.instance.RequestNarration(new NarrationRequest
+                        {
+                            soundString = "AnnounceBigHit",
+                            cooldown = 15f,
+                            priority = NarratorController.InterruptPriority.Low
+                        });
+                        return;
+                    }
                 }
             }
-            if (report.victimTeamIndex == TeamIndex.Player && report.victimBody && !report.isFallDamage)
+            
+            if (report.victimBody && report.victimBody.isPlayerControlled && !report.isFallDamage)
             {
                 if (report.victim.combinedHealthFraction < 0.15f)
                 {
@@ -263,20 +283,6 @@ namespace BackToThePit
             }
         }
 
-        private void CharacterSelectController_SelectSurvivor(On.RoR2.UI.CharacterSelectController.orig_SelectSurvivor orig, CharacterSelectController self, SurvivorIndex survivor)
-        {
-            GameObject bodyPrefab = SurvivorCatalog.GetSurvivorDef(survivor).bodyPrefab;
-
-            NarratorController.instance.RequestNarration(new NarrationRequest 
-            { 
-                soundString = "Announce" + bodyPrefab.name, 
-                cooldown = 0f, 
-                priority = NarratorController.InterruptPriority.CharacterSelect 
-            });
-
-            orig(self, survivor);
-        }
-
         private void GlobalEventManager_onCharacterDeathGlobal(DamageReport report)
         {
             if (report.victimBody.isPlayerControlled)
@@ -286,7 +292,7 @@ namespace BackToThePit
                 {
                     soundString = "AnnouncePlayerDeath",
                     cooldown = 10f,
-                    priority = NarratorController.InterruptPriority.High
+                    priority = NarratorController.InterruptPriority.Death
                 });
                 return;
             }
@@ -297,7 +303,7 @@ namespace BackToThePit
                     NarratorController.instance.RequestNarration(new NarrationRequest
                     {
                         soundString = "AnnounceKillWorm",
-                        cooldown = 3f,
+                        cooldown = 15f,
                         priority = NarratorController.InterruptPriority.High
                     });
                     return;
@@ -307,7 +313,7 @@ namespace BackToThePit
                     NarratorController.instance.RequestNarration(new NarrationRequest
                     {
                         soundString = "AnnounceKillAWU",
-                        cooldown = 3f,
+                        cooldown = 15f,
                         priority = NarratorController.InterruptPriority.High
                     });
                     return;
@@ -317,7 +323,7 @@ namespace BackToThePit
                     NarratorController.instance.RequestNarration(new NarrationRequest
                     {
                         soundString = "AnnounceKillBig",
-                        cooldown = 3f,
+                        cooldown = 15f,
                         priority = NarratorController.InterruptPriority.High
                     });
                     return;
@@ -328,8 +334,8 @@ namespace BackToThePit
                     NarratorController.instance.RequestNarration(new NarrationRequest
                     {
                         soundString = "AnnounceKillDot",
-                        cooldown = 10f,
-                        priority = NarratorController.InterruptPriority.Low
+                        cooldown = 15f,
+                        priority = NarratorController.InterruptPriority.Mid
                     });
                     return;
                 }
@@ -339,8 +345,8 @@ namespace BackToThePit
                     NarratorController.instance.RequestNarration(new NarrationRequest
                     {
                         soundString = "AnnounceOverkill",
-                        cooldown = 8f,
-                        priority = NarratorController.InterruptPriority.Low
+                        cooldown = 15f,
+                        priority = NarratorController.InterruptPriority.Mid
                     });
                     return;
                 }
@@ -356,8 +362,8 @@ namespace BackToThePit
                     NarratorController.instance.RequestNarration(new NarrationRequest
                     {
                         soundString = "AnnounceKillMedium",
-                        cooldown = 8f,
-                        priority = NarratorController.InterruptPriority.Low
+                        cooldown = 16f,
+                        priority = NarratorController.InterruptPriority.Mid
                     });
                     return;
                 }
@@ -366,8 +372,8 @@ namespace BackToThePit
                     NarratorController.instance.RequestNarration(new NarrationRequest
                     {
                         soundString = "AnnounceKillWeak",
-                        cooldown = 10f,
-                        priority = NarratorController.InterruptPriority.Low
+                        cooldown = 16f,
+                        priority = NarratorController.InterruptPriority.Mid
                     });
                     return;
                 }

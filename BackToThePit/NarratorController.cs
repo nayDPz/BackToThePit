@@ -26,6 +26,7 @@ namespace BackToThePit
             Low, // Kills, Item Pickup, Healed, Damaged
             Mid, // Crits, Interactibles
             High, // Boss kill, Boss spawn, Death, Revive, Enter stage
+            Death,
         }
 
         public void RequestNarration(NarrationRequest request)
@@ -35,7 +36,7 @@ namespace BackToThePit
 
         public void RequestNarration(NarrationRequest request, GameObject gameObject)
         {
-            Log.LogInfo("Requesting " + request.soundString);
+            //Log.LogInfo("Requesting " + request.soundString);
             string soundString = request.soundString;
             InterruptPriority overridePriority = request.priority;
             float cooldown = request.cooldown;

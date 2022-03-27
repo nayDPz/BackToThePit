@@ -21,69 +21,116 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BepInEx.Analyzers" Version="1.0.6">
+    <PackageReference Include="BepInEx.Analyzers" Version="1.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="BepInEx.Core" Version="5.4.16" />
-    <PackageReference Include="RiskOfRain2.GameLibs" Version="1.1.1.4-r.1" />
-    <PackageReference Include="UnityEngine.Modules" Version="2018.4.16" />
+    <PackageReference Include="RiskOfRain2.GameLibs" Version="1.2.1-r.1" />
+    <PackageReference Include="UnityEngine.Modules" Version="2019.4.26">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\stubs\Assembly-CSharp.dll</HintPath>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="0Harmony20">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\0Harmony20.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx.Harmony">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\BepInEx.Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx.MonoMod.Loader">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\BepInEx.MonoMod.Loader.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx.Preloader">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\BepInEx.Preloader.dll</HintPath>
+    </Reference>
+    <Reference Include="com.unity.multiplayer-hlapi.Runtime">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\com.unity.multiplayer-hlapi.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Facepunch.Steamworks">
-      <HintPath>libs\Facepunch.Steamworks.dll</HintPath>
-      <Private>false</Private>
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\Facepunch.Steamworks.dll</HintPath>
     </Reference>
-    <Reference Include="KdTreeLib">
-      <HintPath>libs\KdTreeLib.dll</HintPath>
-      <Private>false</Private>
+    <Reference Include="HarmonyXInterop">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\HarmonyXInterop.dll</HintPath>
     </Reference>
-    <Reference Include="MMHOOK_Assembly-CSharp">
-      <HintPath>libs\MMHOOK_Assembly-CSharp.dll</HintPath>
-      <Private>false</Private>
+    <Reference Include="KinematicCharacterController">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\KinematicCharacterController.dll</HintPath>
     </Reference>
-    <Reference Include="Mono.Security">
-      <HintPath>libs\Mono.Security.dll</HintPath>
-      <Private>false</Private>
+    <Reference Include="MMHOOK_RoR2">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Risk of Rain 2\BepInEx\plugins\MMHOOK\MMHOOK_RoR2.dll</HintPath>
     </Reference>
-    <Reference Include="pb_Stl">
-      <HintPath>libs\pb_Stl.dll</HintPath>
-      <Private>false</Private>
+    <Reference Include="Mono.Cecil">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\Mono.Cecil.dll</HintPath>
     </Reference>
-    <Reference Include="Poly2Tri">
-      <HintPath>libs\Poly2Tri.dll</HintPath>
-      <Private>false</Private>
+    <Reference Include="Mono.Cecil.Mdb">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\Mono.Cecil.Mdb.dll</HintPath>
     </Reference>
-    <Reference Include="ProBuilderCore">
-      <HintPath>libs\ProBuilderCore.dll</HintPath>
-      <Private>false</Private>
+    <Reference Include="Mono.Cecil.Pdb">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\Mono.Cecil.Pdb.dll</HintPath>
     </Reference>
-    <Reference Include="ProBuilderMeshOps">
-      <HintPath>libs\ProBuilderMeshOps.dll</HintPath>
-      <Private>false</Private>
+    <Reference Include="Mono.Cecil.Rocks">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\Mono.Cecil.Rocks.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\MonoMod.RuntimeDetour.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.Utils">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\MonoMod.Utils.dll</HintPath>
     </Reference>
     <Reference Include="R2API">
-      <HintPath>libs\R2API.dll</HintPath>
-      <Private>false</Private>
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\R2API.dll</HintPath>
     </Reference>
     <Reference Include="Rewired_Windows_Lib">
-      <HintPath>libs\Rewired_Windows_Lib.dll</HintPath>
-      <Private>false</Private>
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\Rewired_Windows_Lib.dll</HintPath>
     </Reference>
     <Reference Include="RiskOfOptions">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Risk of Rain 2\BepInEx\plugins\RiskOfOptions\RiskOfOptions.dll</HintPath>
+      <HintPath>libs\RiskOfOptions.dll</HintPath>
     </Reference>
-    <Reference Include="SimpleJSON">
-      <HintPath>libs\SimpleJSON.dll</HintPath>
-      <Private>false</Private>
+    <Reference Include="RoR2">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\RoR2.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Postprocessing.Runtime">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\Unity.Postprocessing.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\UnityEngine.AnimationModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\UnityEngine.AssetBundleModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ParticleSystemModule">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\UnityEngine.ParticleSystemModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="Wwise">
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\Wwise.dll</HintPath>
     </Reference>
     <Reference Include="Zio">
-      <HintPath>libs\Zio.dll</HintPath>
-      <Private>false</Private>
+      <HintPath>..\..\..\..\source\repos\Dancer\libs\Zio.dll</HintPath>
     </Reference>
   </ItemGroup>
 
